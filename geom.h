@@ -52,6 +52,8 @@ class Entity {
   virtual bool inside (const Point3D &p) const = 0;
   virtual bool intersect (Intersection &i, const Object &o, real tlim = 0.0)
     const = 0;
+  virtual real texture_u (const Point3D &p) const = 0;
+  virtual real texture_v (const Point3D &p) const = 0;
   virtual UnitVector3D get_normal (const Intersection &i) const = 0;
   virtual UnitVector3D get_normal (const Point3D &p) const = 0;
 };
@@ -73,6 +75,8 @@ class Plane : public Entity {
 
   bool inside (const Point3D &p) const;
   bool intersect (Intersection &i, const Object &o, real tlim = 0.0) const;
+  real texture_u (const Point3D &p) const;
+  real texture_v (const Point3D &p) const;
   UnitVector3D get_normal (const Intersection &i) const;
   UnitVector3D get_normal (const Point3D &p) const;
 };
@@ -90,6 +94,8 @@ class Sphere : public Entity {
 
   bool inside (const Point3D &p) const;
   bool intersect (Intersection &i, const Object &o, real tlim = 0.0) const;
+  real texture_u (const Point3D &p) const;
+  real texture_v (const Point3D &p) const;
   UnitVector3D get_normal (const Intersection &i) const;
   UnitVector3D get_normal (const Point3D &p) const;
 };
@@ -109,6 +115,8 @@ class ReverseSphere : public Sphere {
 class CSGEntity : public Entity {
   UnitVector3D get_normal (const Intersection &i) const;
   UnitVector3D get_normal (const Point3D &p) const;
+  real texture_u (const Point3D &p) const;
+  real texture_v (const Point3D &p) const;
 };
 
 class BoundingBox : public CSGEntity {

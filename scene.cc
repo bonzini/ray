@@ -74,7 +74,7 @@ Color Scene::trace (const Ray3D &ray, int max_ref, real ior, Color strength,
   const Texture &t = i.object->t;
 
   UnitVector3D normal = i.from_inside ? -e.get_normal (i) : e.get_normal (i);
-  Color obj_color = t.get_color (p) * strength;
+  Color obj_color = t.get_color (p, e) * strength;
 
   c += (ambient + m.ambient) * obj_color;
 

@@ -26,6 +26,7 @@ struct P3D {
 
   P3D<T> operator + (const V3D<T> &p) const { return P3D<T> (*this) += p; }
   V3D<T> operator - (const P3D<T> &p) const { return V3D<T> (*this, p); }
+  T operator * (const V3D<T> &v) const { return x * v.x + y * v.y + z * v.z; }
 
   P3D<T> &operator += (const V3D<T> &v) {
     x += v.x, y += v.y, z += v.z;
@@ -110,6 +111,8 @@ struct V3D {
   }
 
   T operator * (const V3D<T> &v) const { return x * v.x + y * v.y + z * v.z; }
+  T operator * (const P3D<T> &v) const { return x * v.x + y * v.y + z * v.z; }
+
   T cosine (const V3D<T> &v) const {
     return (*this * v) / (this->length () * v.length ());
   }

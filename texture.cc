@@ -4,9 +4,25 @@
 #include "texture.h"
 #include "light.h"
 
-Color MonoTexture::get_color (const Point3D &p3d) const
+Color MonoTexture::get_color (const Point3D &p3d, const Entity &e) const
 {
   return pigment;
+}
+
+Color UVTexture::get_color (const Point3D &p3d, const Entity &e) const
+{
+  real u = e.texture_u (p3d);
+  real v = e.texture_v (p3d);
+  return get_color (u, v);
+}
+
+Color CheckerTexture::get_color (real u, real v) const
+{
+  u /= scale;
+  v /= scale;
+  bool u_pos = (u - floor (u)) < 0.5;
+  bool v_pos = (v - floor (v)) < 0.5;
+  return (u_pos == v_pos) ? a : b;
 }
 
 namespace colors {

@@ -34,6 +34,18 @@ bool Plane::intersect (Intersection &i, const Object &o, real tlim) const
     return false;
 }
 
+real Plane::texture_u (const Point3D &p) const
+{
+  Vector3D v (normal.y, -normal.x, normal.z);
+  return (p * v);
+}
+
+real Plane::texture_v (const Point3D &p) const
+{
+  Vector3D v (normal.x, -normal.z, normal.y);
+  return (p * v);
+}
+
 UnitVector3D Plane::get_normal (const Point3D &p) const
 {
   return normal;
@@ -85,6 +97,21 @@ UnitVector3D Sphere::get_normal (const Intersection &i) const
   return UnitVector3D ((i.r (i.t) - center) / r);
 }
 
+real Sphere::texture_u (const Point3D &p) const
+{
+  real dx = p.x - center.x;
+  real dz = p.z - center.z;
+  return atan2 (dz, dx) / M_PI;
+}
+
+real Sphere::texture_v (const Point3D &p) const
+{
+  real dx = p.x - center.x;
+  real dy = p.y - center.y;
+  real dz = p.z - center.z;
+  return atan2 (dy, hypot (dx, dz)) / M_PI;
+}
+
 
 bool ReverseSphere::inside (const Point3D &p) const
 {
@@ -111,6 +138,17 @@ UnitVector3D CSGEntity::get_normal (const Point3D &p) const
 {
   std::abort ();
 }
+
+real CSGEntity::texture_u (const Point3D &p) const
+{
+  std::abort ();
+}
+
+real CSGEntity::texture_v (const Point3D &p) const
+{
+  std::abort ();
+}
+
 
 bool BoundingBox::inside (const Point3D &p) const
 {
