@@ -70,7 +70,7 @@ Color Scene::trace (const Ray3D &ray, int max_ref, real strength) const
   const Material &m = i.object->m;
   const Texture &t = i.object->t;
   Color obj_color = t.get_color (p) * strength;
-  c += ambient * obj_color;
+  c += (ambient + m.ambient) * obj_color;
 
   for (light_iterator li = lights.begin (); li != lights.end (); li++)
     {
@@ -114,7 +114,7 @@ Color Scene::trace (const Ray3D &ray, int max_ref, real strength) const
     {
       Color ref_color;
       Vector3D reflected = 2 * (ray.dir * normal) * normal - ray.dir ;
-      Ray3D reflected_ray = Ray3D (p, reflected, 0.01);
+      Ray3D reflected_ray = Ray3D (p, -reflected, 0.01);
       c += trace (reflected_ray, max_ref - 1, strength * m.reflective);
     }
 

@@ -4,15 +4,15 @@
 int main (void)
 {
   Light l (30, 30, -30);
-  Material floor (1, 0, 0);
-  Material plastic (1, 1, 0);
+  Material floor (0, 1, 0, 0);
+  Material plastic (0, 1, 1, 0);
 
   Plane p (0, 1, 0, 0);
   Sphere s (0, 3, 0, 3);
 
   Scene scene (0.3);
   scene.add_light (l);
-  scene.add_object (p, floor, MonoTexture::blue);
+  scene.add_object (p, floor, MonoTexture::lightBlue);
   scene.add_object (s, plastic, MonoTexture::red);
 
   Image image;

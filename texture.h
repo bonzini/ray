@@ -14,6 +14,7 @@ namespace colors {
   extern Color green;
   extern Color lightBlue;
   extern Color blue;
+  extern Color yellow;
 }
 
 
@@ -34,6 +35,7 @@ struct MonoTexture : Texture {
   static MonoTexture green;
   static MonoTexture lightBlue;
   static MonoTexture blue;
+  static MonoTexture yellow;
 };
 
 #endif

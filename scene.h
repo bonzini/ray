@@ -17,6 +17,7 @@
 #endif
 
 struct Material {
+  real ambient;
   real diffuse;
 
   real specular;
@@ -25,9 +26,9 @@ struct Material {
   real reflective;
   int max_ref;
 
-  Material (real diffuse_ = 1.0, real specular_ = 0.0, real reflective_ = 0.0,
-	    int reflectivity_ = 20, int max_ref_ = 5) :
-    diffuse (diffuse_), specular (specular_),
+  Material (real ambient_ = 0.0, real diffuse_ = 1.0, real specular_ = 0.0,
+	    real reflective_ = 0.0, int reflectivity_ = 20, int max_ref_ = 5) :
+    ambient (ambient_), diffuse (diffuse_), specular (specular_),
     reflectivity (reflectivity_), reflective (reflective_),
     max_ref (reflective > 0.0 ? max_ref_ : 0) {}
 };

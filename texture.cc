@@ -16,6 +16,7 @@ namespace colors {
   Color green = Color (0.0, 1.0, 0.0);
   Color lightBlue = Color (0.0, 0.0, 1.0);
   Color blue = Color (0.0, 0.0, 0.5);
+  Color yellow = Color (1.0, 1.0, 0.0);
 }
 
 MonoTexture MonoTexture::black (colors::black);
@@ -24,4 +25,5 @@ MonoTexture MonoTexture::red (colors::red);
 MonoTexture MonoTexture::green (colors::green);
 MonoTexture MonoTexture::lightBlue (colors::lightBlue);
 MonoTexture MonoTexture::blue (colors::blue);
+MonoTexture MonoTexture::yellow (colors::yellow);
 
