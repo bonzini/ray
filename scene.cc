@@ -2,6 +2,12 @@
 // Written by Paolo Bonzini, 2005
 
 #include "scene.h"
+#include "rand.h"
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <getopt.h>
 
 void Scene::render (const Ray3D &camera, Image &m, int max_ref) const
 {
@@ -37,6 +43,161 @@ void Scene::render (const Ray3D &camera, Image &m, int max_ref) const
       std::cerr << '.';
     }
   std::cerr << std::endl;
+}
+
+// Routine per interpretare il parametro -S (--seed).
+int
+parse_num (const char *c)
+{
+  std::istringstream iss(c);
+  int num;
+  iss >> num;
+
+  return (bool) iss ? num : -1;
+}
+
+// Stampa l'help.
+void
+usage(char *progname, int exit_status)
+{
+  std::cerr << "Usage: " << progname << " [OPTIONS...]\n"
+"\n"
+" -o, --output-file=NAME   set output file name (- = stdout)\n"
+" -f, --file-format=FORMAT set output file format (ppm, png)\n"
+" -w, --width=SIZE         set output width (must be power of two)\n"
+" -h, --height=SIZE        set output height (must be power of two)\n"
+" -S, --seed=NUMBER        set random number seed\n\n";
+
+  exit (exit_status);
+}
+
+void
+Scene::render (const Ray3D &camera_dir, int argc, char **argv,
+	       int default_width, int default_height,
+	       char *default_output_file, enum image_file_format output_format,
+	       int max_ref) const
+{
+  char *output_filename = NULL;
+  int width = -1;
+  int height = -1;
+  int seed = std::time(0);
+
+  while (1)
+    {
+      static struct option long_options[] =
+        {
+          /* These options set a flag. */
+          {"help",    no_argument, 	      0, 1},
+          {"file-format", required_argument,  0, 'f'},
+          {"output-file",  required_argument, 0, 'o'},
+          {"width",   required_argument,      0, 'w'},
+          {"height",   required_argument,     0, 'h'},
+          {"seed",    required_argument,      0, 'S'},
+          {0, 0, 0, 0}
+        };
+      /* `getopt_long' stores the option index here. */
+      int option_index = 0;
+      int c;
+
+      c = getopt_long (argc, argv, "f:o:h:s:S:w:",
+                       long_options, &option_index);
+
+      /* Detect the end of the options. */
+      if (c == -1)
+        break;
+
+      switch (c)
+        {
+	case 0:
+	  break;
+
+        case 'o':
+          output_filename = optarg;
+          break;
+
+        case 'f':
+          if (strcmp (optarg, "ppm") == 0)
+	    {
+	      output_format = OUT_PPM;
+  	      if (default_output_file == NULL)
+		default_output_file = "ptgen.ppm";
+	    }
+#ifdef HAVE_LIBPNG
+	  else if (strcmp (optarg, "png") == 0)
+	    {
+	      output_format = OUT_PNG;
+  	      if (default_output_file == NULL)
+		default_output_file = "ptgen.png";
+	    }
+#endif
+	  else
+	    {
+	      std::cerr << "Invalid file format" << std::endl;
+	      usage (argv[0], 1);
+	    }
+          break;
+
+        case 'S':
+          if ((seed = parse_num (optarg)) == -1)
+	    {
+	      std::cerr << "Wrong syntax for --seed option" << std::endl;
+	      usage (argv[0], 1);
+	    }
+
+	  break;
+
+        case 'w':
+          if ((width = parse_num (optarg)) == -1)
+	    {
+	      std::cerr << "Wrong syntax for --width option" << std::endl;
+	      usage (argv[0], 1);
+	    }
+
+          break;
+
+        case 'h':
+          if ((height = parse_num (optarg)) == -1)
+	    {
+	      std::cerr << "Wrong syntax for --height option" << std::endl;
+	      usage (argv[0], 1);
+	    }
+
+          break;
+
+        case 1:
+	  usage (argv[0], 0);
+	  break;
+
+        case '?':
+          /* `getopt_long' already printed an error message. */
+	  usage (argv[0], 1);
+
+        default:
+          abort ();
+        }
+    }
+
+  if (width == -1)
+    {
+      if (height == -1)
+        height = default_height;
+      width = (int) (height * (real) default_width / default_height);
+    }
+  if (height == -1)
+    height = (int) (width * (real) default_height / default_width);
+
+  Image i;
+  i.set_size (width, height);
+  randf.set_seed (28111979L, seed);
+
+  if (!output_filename)
+    output_filename = default_output_file;
+
+  render (camera_dir, i, max_ref);
+  if (strcmp(output_filename, "-") == 0)
+    i.write (std::cout, output_format);
+  else
+    i.write (output_filename, output_format);
 }
 
 bool Scene::compute_intersection (Intersection &i) const

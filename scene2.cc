@@ -4,7 +4,7 @@
 #include "images.h"
 #include "scene.h"
 
-int main (void)
+int main (int argc, char **argv)
 {
   Point3D location (0, 5, -20);
   Vector3D direction (0, 0, 1);
@@ -36,9 +36,5 @@ int main (void)
   scene.add_object (s3, shiny, MonoTexture::green);
   scene.add_object (s4, shiny, MonoTexture::yellow);
 
-  Image image;
-  image.set_size (320, 240);
-
-  scene.render (location, direction, image);
-  image.write ("scene2.png", OUT_PNG);
+  scene.render (location, direction, argc, argv, 320, 240);
 }

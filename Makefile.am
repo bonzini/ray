@@ -40,7 +40,7 @@ scene8_SOURCES = scene8.cc
 scene8_DEPENDENCIES = libray.la
 
 %.png: %
-	./$<
+	./$< -o$@ -fpng
 
 AM_CFLAGS = -Wall $(ARCH_CFLAGS)
 AM_CXXFLAGS = -Wall $(ARCH_CFLAGS)

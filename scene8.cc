@@ -4,7 +4,7 @@
 #include "images.h"
 #include "scene.h"
 
-int main (void)
+int main (int argc, char **argv)
 {
   Light l (10, 10, -30);
   // Material floor (0, 0.8, 0, 0.1);
@@ -21,11 +21,7 @@ int main (void)
   scene.add_object (p, floor, floor_texture);
   scene.add_object (s, glass, MonoTexture::white);
 
-  Image image;
-  image.set_size (320, 240);
-
   Point3D location (0, 5, -20);
   Vector3D direction (0, 0, 1);
-  scene.render (location, direction, image);
-  image.write ("scene8.png", OUT_PNG);
+  scene.render (location, direction, argc, argv, 320, 240);
 }

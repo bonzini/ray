@@ -22,7 +22,7 @@ Sphere shell (int i)
   return Sphere (x, y, z, r);
 }
 
-int main (void)
+int main (int argc, char **argv)
 {
   Light l (30, 30, -30);
   Material plastic (0, 1, 1, 0);
@@ -38,11 +38,7 @@ int main (void)
       scene.add_object (s[i], plastic, coral);
     }
 
-  Image image;
-  image.set_size (320, 240);
-
   Point3D location (0, -7, -20);
   Vector3D direction (0, -0.1, 1);
-  scene.render (location, direction, image);
-  image.write ("scene7.png", OUT_PNG);
+  scene.render (location, direction, argc, argv, 320, 240);
 }
