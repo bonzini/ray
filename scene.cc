@@ -24,7 +24,7 @@ void Scene::render (const Ray3D &camera, Image &m, int max_ref) const
     {
       Vector3D dir = leftmost_dir;
       for (int j = 0; j < w; j++, dir += x_vec_step)
-	m.set_pixel (j, i, trace (Ray3D (camera.source, dir), max_ref));
+	m.set_pixel (j, i, trace (Ray3D (camera.source, dir), max_ref, 1.0));
       std::cerr << '.';
     }
   std::cerr << std::endl;
@@ -55,7 +55,8 @@ bool Scene::find_an_intersection (NormRay3D &r) const
   return false;
 }
 
-Color Scene::trace (const Ray3D &ray, int max_ref, real strength) const
+Color Scene::trace (const Ray3D &ray, int max_ref, real ior, Color strength,
+		    real absorbance) const
 {
   Intersection i (ray);
   Color c (0.0, 0.0, 0.0);
@@ -64,12 +65,20 @@ Color Scene::trace (const Ray3D &ray, int max_ref, real strength) const
 
   Point3D p = i.r (i.t);
 
-  UnitVector3D normal = i.entity->get_normal (p);
   bool have_shadows = i.object->have_shadows;
-
+  const Entity &e = *(i.entity);
   const Material &m = i.object->m;
   const Texture &t = i.object->t;
+
+  UnitVector3D normal = i.from_inside ? -e.get_normal (i) : e.get_normal (i);
   Color obj_color = t.get_color (p) * strength;
+  if (absorbance < 1.0)
+    {
+      obj_color.r *= -exp (-i.t * absorbance);
+      obj_color.g *= -exp (-i.t * absorbance);
+      obj_color.b *= -exp (-i.t * absorbance);
+    }
+
   c += (ambient + m.ambient) * obj_color;
 
   for (light_iterator li = lights.begin (); li != lights.end (); li++)
@@ -79,7 +88,7 @@ Color Scene::trace (const Ray3D &ray, int max_ref, real strength) const
 
       if (have_shadows && l.cast_shadows)
 	{
-	  NormRay3D shadow_ray (p, to_light, 0.01);
+	  NormRay3D shadow_ray (p, to_light, 0.0001);
 	  if (find_an_intersection (shadow_ray))
 	    continue;
 	}
@@ -100,7 +109,7 @@ Color Scene::trace (const Ray3D &ray, int max_ref, real strength) const
           if (cosine > 0.0)
 	    {
 	      cosine = std::pow (cosine, m.reflectivity);
-              Color light_color = l.get_color (p) * strength;
+              Color light_color = strength * l.get_color (p);
 	      c += m.specular * cosine * light_color;
 	    }
 	}
@@ -110,12 +119,32 @@ Color Scene::trace (const Ray3D &ray, int max_ref, real strength) const
   if (m.max_ref < max_ref)
     max_ref = m.max_ref;
 
-  if (max_ref > 0)
+  if (m.reflective > 0 && max_ref > 0)
     {
-      Color ref_color;
-      Vector3D reflected = 2 * (ray.dir * normal) * normal - ray.dir ;
-      Ray3D reflected_ray = Ray3D (p, -reflected, 0.01);
-      c += trace (reflected_ray, max_ref - 1, strength * m.reflective);
+      Vector3D reflected = ray.dir - 2 * (ray.dir * normal) * normal;
+      Ray3D reflected_ray = Ray3D (p, reflected, 0.0001);
+      c += trace (reflected_ray, max_ref - 1, ior, strength * m.reflective);
+    }
+
+  // refractions...
+  if (m.refractive > 0 && max_ref > 0)
+    {
+      // Relative index of refraction
+      real n = ior / m.ior;
+      real cosI = -normal * ray.dir;
+      real sinI2 = 1.0 - cosI * cosI;
+      real sinT2 = (n * n) * sinI2;
+      real cosT2 = 1.0 - sinT2;
+      if (cosT2 > 0.0)
+	{
+	  real cosT = sqrt (cosT2);
+	  Vector3D refracted = n * ray.dir + (n * cosI - cosT) * normal;
+          Ray3D refracted_ray = Ray3D (p, refracted, 0.01);
+          c += trace (refracted_ray, max_ref - 1, m.ior,
+		      strength * m.refractive * obj_color,
+		      i.from_inside ? absorbance * m.absorbance
+				    : absorbance / m.absorbance);
+	}
     }
 
   return c;

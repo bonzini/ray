@@ -19,25 +19,32 @@ struct Intersection {
   const Entity *entity;
   const Object *object;
   real t;
+  bool from_inside;
 
   explicit Intersection (const Ray3D &r_) :
-    r(r_.normalize ()), entity (NULL), object (NULL), t (inf) {}
+    r(r_.normalize ()), entity (NULL), object (NULL), t (inf),
+    from_inside (false) {}
   explicit Intersection (const NormRay3D &r_) :
-    r(r_), entity (NULL), object (NULL), t (inf) {}
+    r(r_), entity (NULL), object (NULL), t (inf), from_inside (false) {}
   Intersection (const Point3D &r_, const Vector3D &v_) :
-    r(r_, v_), entity (NULL), object (NULL), t (inf) {}
+    r(r_, v_), entity (NULL), object (NULL), t (inf), from_inside (false) {}
   Intersection (const Point3D &r_, const UnitVector3D &v_) :
-    r(r_, v_), entity (NULL), object (NULL), t (inf) {}
+    r(r_, v_), entity (NULL), object (NULL), t (inf), from_inside (false) {}
   Intersection (const Ray3D &r_, real t_) :
-    r(r_.source, r_.dir, t_), entity (NULL), object (NULL), t (inf) {}
+    r(r_.source, r_.dir, t_), entity (NULL), object (NULL),
+    t (inf), from_inside (false) {}
   Intersection (const NormRay3D &r_, real t_) :
-    r(r_.source, r_.dir, t_), entity (NULL), object (NULL), t (inf) {}
+    r(r_.source, r_.dir, t_), entity (NULL), object (NULL),
+    t (inf), from_inside (false) {}
   Intersection (const Intersection &i, real t_) :
-    r(i.r), entity (i.entity), object (i.object), t (i.t) {}
+    r (i.r), entity (i.entity), object (i.object),
+    t (i.t), from_inside (false) {}
   Intersection (const Intersection &i, Vector3D &dir, real t_ = 0.0) :
-    r(i.r (i.t), dir, t_), entity (i.entity), object (i.object), t (t_) {}
+    r(i.r (i.t), dir, t_), entity (i.entity), object (i.object),
+    t (t_), from_inside (false) {}
   Intersection (const Intersection &i, UnitVector3D &dir, real t_ = 0.0) :
-    r(i.r (i.t), dir, t_), entity (i.entity), object (i.object), t (t_) {}
+    r(i.r (i.t), dir, t_), entity (i.entity), object (i.object),
+    t (t_), from_inside (false) {}
 };
 
 class Entity {
@@ -123,8 +130,6 @@ class Difference : public CSGEntity {
 
   bool inside (const Point3D &p) const;
   bool intersect (Intersection &i, const Object &o) const;
-  UnitVector3D get_normal (const Intersection &i) const;
-  UnitVector3D get_normal (const Point3D &p) const;
 };
 
 class Union : public CSGEntity {

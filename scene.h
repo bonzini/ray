@@ -26,11 +26,17 @@ struct Material {
   real reflective;
   int max_ref;
 
+  real refractive;
+  real ior;
+  real absorbance;
+
   Material (real ambient_ = 0.0, real diffuse_ = 1.0, real specular_ = 0.0,
-	    real reflective_ = 0.0, int reflectivity_ = 20, int max_ref_ = 5) :
+	    real reflective_ = 0.0, real refractive_ = 0.0,
+	    real ior_ = 1.0, real absorbance_ = 0.15,
+	    int reflectivity_ = 20, int max_ref_ = 5) :
     ambient (ambient_), diffuse (diffuse_), specular (specular_),
-    reflectivity (reflectivity_), reflective (reflective_),
-    max_ref (reflective > 0.0 ? max_ref_ : 0) {}
+    reflectivity (reflectivity_), reflective (reflective_), max_ref (max_ref_),
+    refractive (refractive_), ior (ior_), absorbance (absorbance_) {}
 };
 
 struct Object {
@@ -60,7 +66,9 @@ class Scene {
 
   bool compute_intersection (Intersection &i) const;
   bool find_an_intersection (NormRay3D &r) const;
-  Color trace (const Ray3D &r, int max_ref, real strength = 1.0) const;
+  Color trace (const Ray3D &r, int max_ref, real ior,
+	       Color strength = colors::white, real absorbance = 1.0)
+    const;
 
  public:
   real ambient;

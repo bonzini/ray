@@ -61,9 +61,11 @@ bool Sphere::intersect (Intersection &i, const Object &o) const
 
   // Return the point that is in front of the observer, or the closest one.
   real tdc = sqrt (tdc2);
-  real t = tpp - tdc >= 0.0 ? tpp - tdc : tpp + tdc;
+  bool from_inside = tpp - tdc < 0.0;
+  real t = from_inside ? tpp + tdc : tpp - tdc;
   if (t > 0.0 && t < i.t)
     {
+      i.from_inside = from_inside;
       i.t = t;
       i.entity = this;
       i.object = &o;
@@ -143,27 +145,12 @@ bool Difference::intersect (Intersection &i, const Object &o) const
     }
   else if (bite.intersect (i, o))
     {
-      i.entity = this;
+      i.from_inside = !i.from_inside;
       return true;
     }
   else
     return false;
       
-}
-
-UnitVector3D Difference::get_normal (const Intersection &i) const
-{
-  // If the intersection was part of the main object, i.entity would have
-  // been obj, not the Difference.
-  return -bite.get_normal (i);
-}
-
-UnitVector3D Difference::get_normal (const Point3D &p) const
-{
-  // If the intersection was part of the main object, i.entity would have
-  // been obj, not the Difference.  Well, here no Intersection object is
-  // involved but the idea is the same.
-  return -bite.get_normal (p);
 }
 
 bool Union::inside (const Point3D &p) const
