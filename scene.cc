@@ -252,6 +252,7 @@ Color Scene::trace (const Ray3D &ray, int max_ref, real ior, Color strength,
     {
       const AbstractLight &l = **li;
       UnitVector3D to_light = (l.get_pos () - p).normalize ();
+      Color light_color = strength * l.get_color (p);
 
       if (have_shadows && l.cast_shadows)
 	{
@@ -265,7 +266,7 @@ Color Scene::trace (const Ray3D &ray, int max_ref, real ior, Color strength,
 	{
 	  real cosine = to_light * normal;
 	  if (cosine > 0.0)
-	    c += (m.diffuse - ambient) * cosine * obj_color;
+	    c += (m.diffuse - ambient) * cosine * obj_color * light_color;
 	}
       
       // Specular highlights
@@ -276,7 +277,6 @@ Color Scene::trace (const Ray3D &ray, int max_ref, real ior, Color strength,
           if (cosine > 0.0)
 	    {
 	      cosine = std::pow (cosine, m.reflectivity);
-              Color light_color = strength * l.get_color (p);
 	      c += m.specular * cosine * light_color;
 	    }
 	}

@@ -36,9 +36,6 @@ struct Intersection {
   Intersection (const NormRay3D &r_, real t_) :
     r(r_.source, r_.dir, t_), entity (NULL), object (NULL),
     t (inf), from_inside (false) {}
-  Intersection (const Intersection &i, real t_) :
-    r (i.r), entity (i.entity), object (i.object),
-    t (i.t), from_inside (false) {}
   Intersection (const Intersection &i, Vector3D &dir, real t_ = 0.0) :
     r(i.r (i.t), dir, t_), entity (i.entity), object (i.object),
     t (t_), from_inside (false) {}

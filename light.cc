@@ -27,8 +27,16 @@ Color AttenuatedLight::get_color (const Point3D &p) const
 Color BoundedLight::get_color (const Point3D &p) const
 {
   if (e.inside (p))
+    return l.get_color (p);
+  else
+    return colors::black;
+}
+
+Color DirectedLight::get_color (const Point3D &p) const
+{
+  if ((p - pos) * dir < 0)
     return colors::black;
   else
-    return l.get_color (p);
+    return Light::get_color (p);
 }
 

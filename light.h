@@ -35,10 +35,10 @@ struct Light : AbstractLight {
 };
 
 struct LightWrapper : AbstractLight {
-  const Light &l;
+  const AbstractLight &l;
 
  protected:
-  LightWrapper (const Light &base, bool shadows = true) :
+  LightWrapper (const AbstractLight &base, bool shadows = true) :
     AbstractLight (shadows), l (base) {}
   const Point3D &get_pos () const;
 };
@@ -47,7 +47,7 @@ struct AttenuatedLight : LightWrapper {
   real strength;
   real attenuation;
 
-  AttenuatedLight (const Light &base, real att = 0.0, real strength_ = 1.0,
+  AttenuatedLight (const AbstractLight &base, real att = 0.0, real strength_ = 1.0,
     bool shadows = true) : LightWrapper (base, shadows), strength (strength_),
     attenuation (att) {}
 
@@ -57,8 +57,21 @@ struct AttenuatedLight : LightWrapper {
 struct BoundedLight : LightWrapper {
   const Entity &e;
 
-  BoundedLight (const Light &base, const Entity &e_, bool shadows = true) :
+  BoundedLight (const AbstractLight &base, const Entity &e_, bool shadows = true) :
     LightWrapper (base, shadows), e (e_) {}
+
+  Color get_color (const Point3D &p) const;
+};
+
+struct DirectedLight : Light {
+  Vector3D dir;
+
+  DirectedLight (const Point3D &p_, const Vector3D &v_, const Color &c_,
+    bool shadows = true) :
+    Light (p_, c_, shadows), dir (v_) {}
+  DirectedLight (real x, real y, real z, real dx, real dy, real dz,
+    const Color &c_, bool shadows = true) :
+    Light (x, y, z, c_, shadows), dir (dx, dy, dz) {}
 
   Color get_color (const Point3D &p) const;
 };
