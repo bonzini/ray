@@ -45,9 +45,9 @@ class Image
 
     void set_pixel (int x, int y, const Color &c) {
       unsigned char *p = image_data + 3 * (width * y + x);
-      p[0] = (unsigned char) (c.r * 255);
-      p[1] = (unsigned char) (c.g * 255);
-      p[2] = (unsigned char) (c.b * 255);
+      p[0] = c.r < 0 ? 0 : (unsigned char) (c.r * 255);
+      p[1] = c.g < 0 ? 0 : (unsigned char) (c.g * 255);
+      p[2] = c.b < 0 ? 0 : (unsigned char) (c.b * 255);
     }
   };
 

@@ -217,9 +217,9 @@ struct Col {
     return *this;
   }
   Col<T> &operator -= (const Col<T> &v) {
-    r = (r - v.r) < 0.0 ? 0.0 : r - v.r;
-    g = (g - v.g) < 0.0 ? 0.0 : g - v.g;
-    b = (b - v.b) < 0.0 ? 0.0 : b - v.b;
+    r = (r - v.r) > 1.0 ? 1.0 : r - v.r;
+    g = (g - v.g) > 1.0 ? 1.0 : g - v.g;
+    b = (b - v.b) > 1.0 ? 1.0 : b - v.b;
     return *this;
   }
   Col<T> &operator *= (const Col<T> &v) {
@@ -229,34 +229,34 @@ struct Col {
     return *this;
   }
   Col<T> &operator *= (T f) {
-    r *= f; if (r < 0.0) r = 0.0; if (r > 1.0) r = 1.0;
-    g *= f; if (g < 0.0) g = 0.0; if (g > 1.0) g = 1.0;
-    b *= f; if (b < 0.0) b = 0.0; if (b > 1.0) b = 1.0;
+    r *= f; if (r > 1.0) r = 1.0;
+    g *= f; if (g > 1.0) g = 1.0;
+    b *= f; if (b > 1.0) b = 1.0;
     return *this;
   }
   Col<T> &operator /= (T f) {
-    r /= f; if (r < 0.0) r = 0.0; if (r > 1.0) r = 1.0;
-    g /= f; if (g < 0.0) g = 0.0; if (g > 1.0) g = 1.0;
-    b /= f; if (b < 0.0) b = 0.0; if (b > 1.0) b = 1.0;
+    r /= f; if (r > 1.0) r = 1.0;
+    g /= f; if (g > 1.0) g = 1.0;
+    b /= f; if (b > 1.0) b = 1.0;
     return *this;
   }
 };
 
-template <class T>
+template <class T> inline
 V3D<T> operator * (T f, const V3D<T> &v) {
   return V3D<T> (v.x * f, v.y * f, v.z * f);
 }
 
-template <class T>
+template <class T> inline
 V3D<T> operator * (T f, const NV3D<T> &v) {
   return V3D<T> (v.x * f, v.y * f, v.z * f);
 }
 
-template <class T>
+template <class T> inline
 Col<T> operator * (T f, const Col<T> &c) {
-  T r = c.r * f; if (r < 0.0) r = 0.0; if (r > 1.0) r = 1.0;
-  T g = c.g * f; if (g < 0.0) g = 0.0; if (g > 1.0) g = 1.0;
-  T b = c.b * f; if (b < 0.0) b = 0.0; if (b > 1.0) b = 1.0;
+  T r = c.r * f; if (r > 1.0) r = 1.0;
+  T g = c.g * f; if (g > 1.0) g = 1.0;
+  T b = c.b * f; if (b > 1.0) b = 1.0;
   return Col <T> (r, g, b);
 }
 

@@ -12,7 +12,7 @@ int main (void)
 
   Material diffuse (0, 1, 0, 0, 0);
   Material shiny (0, 1, 1, 0.5);
-  Material glass (0, 0, 1, 0.1, 0.8, 1.33, 0.6);
+  Material glass (0, 0, 1, 0.1, 0.8, 1.33, 0.8);
 
   Plane p (0, 1, 0, 0);
 

@@ -7,8 +7,13 @@ noinst_HEADERS = images.h pngwrite.h light.h geom.h \
 	texture.h scene.h v3d.h rand.h
 
 noinst_PROGRAMS = scene1 scene2 scene3 scene4 scene5 scene6 scene7
-CLEANFILES = scene1.png scene2.png scene3.png scene4.png scene5.png \
+
+if HAVE_LIBPNG
+noinst_DATA = scene1.png scene2.png scene3.png scene4.png scene5.png \
   scene6.png scene7.png
+
+CLEANFILES = $(noinst_DATA)
+endif
 
 scene1_SOURCES = scene1.cc
 scene1_DEPENDENCIES = libray.la
@@ -30,6 +35,9 @@ scene6_DEPENDENCIES = libray.la
 
 scene7_SOURCES = scene7.cc
 scene7_DEPENDENCIES = libray.la
+
+%.png: %
+	./$<
 
 AM_CFLAGS = -Wall $(ARCH_CFLAGS)
 AM_CXXFLAGS = -Wall $(ARCH_CFLAGS)
