@@ -1,3 +1,6 @@
+// Example scene
+// Written by Paolo Bonzini, 2005
+
 #include "images.h"
 #include "scene.h"
 

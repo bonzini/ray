@@ -63,6 +63,8 @@ class Plane : public Entity {
   real d;
 
  public:
+  Plane () :
+    normal (0, 1, 0), d (0) {}
   Plane (Vector3D normal_, real d_) :
     normal (normal_.normalize ()), d (d_) {}
   Plane (real a_, real b_, real c_, real d_) :
@@ -87,6 +89,8 @@ class Sphere : public Entity {
   real r, r2;
 
  public:
+  Sphere () :
+    center (0, 0, 1), r (1), r2 (1) {}
   Sphere (Point3D center_, real r_) :
     center (center_), r (r_), r2 (r_ * r_) {}
   Sphere (real x_, real y_, real z_, real r_) :
