@@ -5,23 +5,26 @@
 
 void Scene::render (const Ray3D &camera, Image &m, int max_ref) const
 {
+  // Rotate by 90 degrees around the Y axis
   Vector3D x_vec_unit (camera.dir.z, camera.dir.y, -camera.dir.x);
-  Vector3D y_vec_unit (camera.dir.x, camera.dir.z, -camera.dir.y);
+
+  // Rotate by -90 degrees around the X axis (to compensate for
+  // the wrong orientation of the Y axis on the screen)
+  Vector3D y_vec_unit (-camera.dir.x, -camera.dir.z, camera.dir.y);
 
   int w = m.get_width ();
   int h = m.get_height ();
 
-  Vector3D x_vec_step = x_vec_unit * 2 / w;
-  Vector3D y_vec_step = y_vec_unit * 2 / h;
+  Vector3D x_vec_step = x_vec_unit * 2 / (w - 1);
+  Vector3D y_vec_step = y_vec_unit * 2 / (h - 1);
 
-  Point3D x_orig = x_vec_unit * (w / 2 + 0.5) + y_vec_unit * (h / 2 + 0.5);
+  Vector3D leftmost_dir = camera.dir - x_vec_unit - y_vec_unit;
 
-  for (int i = 0; i < h; i++, x_orig += y_vec_step)
+  for (int i = 0; i < h; i++, leftmost_dir += y_vec_step)
     {
-      Point3D dest = x_orig;
-      for (int j = 0; j < w; j++, dest += x_vec_step)
-	m.set_pixel (j, i,
-		     ambient + trace (Ray3D (camera.source, dest), max_ref));
+      Vector3D dir = leftmost_dir;
+      for (int j = 0; j < w; j++, dir += x_vec_step)
+	m.set_pixel (j, i, trace (Ray3D (camera.source, dir), max_ref));
       std::cerr << '.';
     }
   std::cerr << std::endl;
@@ -39,6 +42,19 @@ bool Scene::compute_intersection (Intersection &i) const
   return had_intersection;
 }
 
+bool Scene::find_an_intersection (NormRay3D &r) const
+{
+  Intersection i (r);
+  for (object_iterator oi = objects.begin (); oi != objects.end (); oi++)
+    {
+      const Object &o = *oi;
+      if (o.intersect (i))
+	return true;
+    }
+
+  return false;
+}
+
 Color Scene::trace (const Ray3D &ray, int max_ref, real strength) const
 {
   Intersection i (ray);
@@ -48,49 +64,45 @@ Color Scene::trace (const Ray3D &ray, int max_ref, real strength) const
 
   Point3D p = i.r (i.t);
 
-  UnitVector3D normal = i.entity->get_normal (p).normalize ();
-  bool have_shadows = i.object->cast_shadows;
+  UnitVector3D normal = i.entity->get_normal (p);
+  bool have_shadows = i.object->have_shadows;
 
   const Material &m = i.object->m;
   const Texture &t = i.object->t;
   Color obj_color = t.get_color (p) * strength;
-  c += m.ambient * obj_color;
+  c += ambient * obj_color;
 
   for (light_iterator li = lights.begin (); li != lights.end (); li++)
     {
       const AbstractLight &l = **li;
-      Vector3D to_light = l.get_pos () - p;
+      UnitVector3D to_light = (l.get_pos () - p).normalize ();
 
       if (have_shadows && l.cast_shadows)
 	{
-	  Intersection i1 (i, to_light, 0.01);
-	  if (compute_intersection (i1))
+	  NormRay3D shadow_ray (p, to_light, 0.01);
+	  if (find_an_intersection (shadow_ray))
 	    continue;
 	}
 
-      to_light = to_light.normalize ();
-
       // Diffuse light
-      {
-        real cosine = to_light.normalize () * normal;
-        if (cosine < 0.0)
-	  cosine = 0.0;
-
-        c += m.diffuse * cosine * obj_color;
-      }
+      if (m.diffuse > 0)
+	{
+	  real cosine = to_light * normal;
+	  if (cosine > 0.0)
+	    c += (m.diffuse - ambient) * cosine * obj_color;
+	}
       
       // Specular highlights
       if (m.specular > 0)
 	{
 	  Vector3D specular = 2 * (to_light * normal) * normal - to_light;
-	  real cosine = -to_light * specular.normalize ();
-          if (cosine < 0.0)
-	    cosine = 0.0;
-	  else
-	    cosine = std::pow (cosine, m.reflectivity);
-
-          Color light_color = l.get_color (p) * strength;
-	  c += m.specular * cosine * light_color;
+	  real cosine = -ray.dir * specular.normalize ();
+          if (cosine > 0.0)
+	    {
+	      cosine = std::pow (cosine, m.reflectivity);
+              Color light_color = l.get_color (p) * strength;
+	      c += m.specular * cosine * light_color;
+	    }
 	}
     }
 

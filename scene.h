@@ -17,7 +17,6 @@
 #endif
 
 struct Material {
-  real ambient;
   real diffuse;
 
   real specular;
@@ -26,9 +25,9 @@ struct Material {
   real reflective;
   int max_ref;
 
-  Material (real ambient_ = 0.0, real diffuse_ = 1.0, real specular_ = 0.0,
-	    int reflectivity_ = 20, real reflective_ = 0.0, int max_ref_ = 5) :
-    ambient (ambient_), diffuse (diffuse_), specular (specular_),
+  Material (real diffuse_ = 1.0, real specular_ = 0.0, real reflective_ = 0.0,
+	    int reflectivity_ = 20, int max_ref_ = 5) :
+    diffuse (diffuse_), specular (specular_),
     reflectivity (reflectivity_), reflective (reflective_),
     max_ref (reflective > 0.0 ? max_ref_ : 0) {}
 };
@@ -37,10 +36,10 @@ struct Object {
   const Entity &e;
   const Material &m;
   const Texture &t;
-  bool cast_shadows;
+  bool have_shadows;
 
   Object (const Entity &e_, const Material &m_, const Texture &t_,
-    bool shadows = true) : e (e_), m (m_), t (t_), cast_shadows (shadows) {}
+    bool shadows = true) : e (e_), m (m_), t (t_), have_shadows (shadows) {}
 
   bool intersect (Intersection &i) const { return e.intersect (i, *this); }
 };
@@ -59,12 +58,13 @@ class Scene {
   typedef slist<Object>::const_iterator object_iterator;
 
   bool compute_intersection (Intersection &i) const;
+  bool find_an_intersection (NormRay3D &r) const;
   Color trace (const Ray3D &r, int max_ref, real strength = 1.0) const;
 
  public:
-  Color ambient;
+  real ambient;
 
-  Scene () : lights (), objects (), ambient (0.0, 0.0, 0.0) {}
+  Scene (real ambient_ = 0.0) : lights (), objects (), ambient (ambient_) {}
 
   void add_light (const AbstractLight &l) {
     lights.push_back (&l);

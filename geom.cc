@@ -8,6 +8,8 @@
 #include "v3d.h"
 #include "geom.h"
 
+real Intersection::inf = INFINITY;
+
 bool Plane::inside (const Point3D &p) const
 {
   return Vector3D (p) * normal + d >= 0;
@@ -15,13 +17,13 @@ bool Plane::inside (const Point3D &p) const
 
 bool Plane::intersect (Intersection &i, const Object &o) const
 {
-  const Ray3D &r = i.r;
+  const NormRay3D &r = i.r;
   real denom = r.dir * normal;
   if (denom == 0.0)
     return false;
 
-  real t = (Vector3D (r.source) * normal + d) / denom;
-  if (t < i.t)
+  real t = -(Vector3D (r.source) * normal + d) / denom;
+  if (t > 0.0 && t < i.t)
     {
       i.t = t;
       i.entity = this;
@@ -32,12 +34,12 @@ bool Plane::intersect (Intersection &i, const Object &o) const
     return false;
 }
 
-Vector3D Plane::get_normal (const Point3D &p) const
+UnitVector3D Plane::get_normal (const Point3D &p) const
 {
   return normal;
 }
 
-Vector3D Plane::get_normal (const Intersection &i) const
+UnitVector3D Plane::get_normal (const Intersection &i) const
 {
   return normal;
 }
@@ -50,7 +52,7 @@ bool Sphere::inside (const Point3D &p) const
 
 bool Sphere::intersect (Intersection &i, const Object &o) const
 {
-  const Ray3D &r = i.r;
+  const NormRay3D &r = i.r;
   Vector3D p_to_center = center - r.source;
   real tpp = p_to_center * r.dir;
   real tdc2 = r2 - (p_to_center * p_to_center - tpp * tpp);
@@ -60,7 +62,7 @@ bool Sphere::intersect (Intersection &i, const Object &o) const
   // Return the point that is in front of the observer, or the closest one.
   real tdc = sqrt (tdc2);
   real t = tpp - tdc >= 0.0 ? tpp - tdc : tpp + tdc;
-  if (t < i.t)
+  if (t > 0.0 && t < i.t)
     {
       i.t = t;
       i.entity = this;
@@ -71,14 +73,14 @@ bool Sphere::intersect (Intersection &i, const Object &o) const
     return false;
 }
 
-Vector3D Sphere::get_normal (const Point3D &p) const
+UnitVector3D Sphere::get_normal (const Point3D &p) const
 {
-  return p - center;
+  return UnitVector3D ((p - center) / r);
 }
 
-Vector3D Sphere::get_normal (const Intersection &i) const
+UnitVector3D Sphere::get_normal (const Intersection &i) const
 {
-  return i.r (i.t) - center;
+  return UnitVector3D ((i.r (i.t) - center) / r);
 }
 
 
@@ -88,22 +90,22 @@ bool ReverseSphere::inside (const Point3D &p) const
   return delta * delta >= r2;
 }
 
-Vector3D ReverseSphere::get_normal (const Intersection &i) const
+UnitVector3D ReverseSphere::get_normal (const Point3D &p) const
 {
-  return center - i.r (i.t);
+  return UnitVector3D ((center - p) / r);
 }
 
-Vector3D ReverseSphere::get_normal (const Point3D &p) const
+UnitVector3D ReverseSphere::get_normal (const Intersection &i) const
 {
-  return center - p;
+  return UnitVector3D ((center - i.r (i.t)) / r);
 }
 
-Vector3D CSGEntity::get_normal (const Intersection &i) const
+UnitVector3D CSGEntity::get_normal (const Intersection &i) const
 {
   std::abort ();
 }
 
-Vector3D CSGEntity::get_normal (const Point3D &p) const
+UnitVector3D CSGEntity::get_normal (const Point3D &p) const
 {
   std::abort ();
 }
@@ -149,14 +151,14 @@ bool Difference::intersect (Intersection &i, const Object &o) const
       
 }
 
-Vector3D Difference::get_normal (const Intersection &i) const
+UnitVector3D Difference::get_normal (const Intersection &i) const
 {
   // If the intersection was part of the main object, i.entity would have
   // been obj, not the Difference.
   return -bite.get_normal (i);
 }
 
-Vector3D Difference::get_normal (const Point3D &p) const
+UnitVector3D Difference::get_normal (const Point3D &p) const
 {
   // If the intersection was part of the main object, i.entity would have
   // been obj, not the Difference.  Well, here no Intersection object is

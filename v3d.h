@@ -129,6 +129,8 @@ struct NV3D {
 
   explicit NV3D<T> (const NR3D<T> &a) :
     x (a.dir.x), y (a.dir.y), z (a.dir.z) {}
+  explicit NV3D<T> (const V3D<T> &a) :
+    x (a.x), y (a.y), z (a.z) {}
 
   V3D<T> operator + (const V3D<T> &v) const { return V3D<T> (*this) += v; }
   V3D<T> operator - (const V3D<T> &v) const { return V3D<T> (*this) -= v; }
@@ -158,7 +160,7 @@ struct R3D {
   P3D<T> source;
   V3D<T> dir;
   R3D<T> () : source (), dir () {}
-  R3D<T> (const P3D<T> &a, const P3D<T> &b) : source (a), dir (a, b) {}
+  R3D<T> (const P3D<T> &a, const P3D<T> &b) : source (a), dir (b - a) {}
   R3D<T> (const P3D<T> &a, const V3D<T> &b, T t = 0.0) : source (a + b * t), dir (b) {}
   R3D<T> (const NR3D<T> &a) : source (a.source), dir (a.dir) {}
 
@@ -176,7 +178,14 @@ struct NR3D {
   P3D<T> source;
   NV3D<T> dir;
   NR3D<T> () : source (), dir () {}
-  NR3D<T> (const P3D<T> &a, const NV3D<T> &b) : source (a), dir (b) {}
+  NR3D<T> (const P3D<T> &a, const P3D<T> &b) :
+    source (a), dir ((b - a).normalize ()) {}
+  NR3D<T> (const P3D<T> &a, const V3D<T> &b, T t = 0.0) :
+    source (a + b * t), dir (b.normalize ()) {}
+  NR3D<T> (const P3D<T> &a, const NV3D<T> &b, T t = 0.0) :
+    source (a + b * t), dir (b) {}
+  NR3D<T> (const NR3D<T> &a, T t = 0.0) :
+    source (a.source + a.dir * t), dir (a.dir) {}
 
   P3D<T> operator () (T time) const { return source + dir * time; }
   NR3D<T> operator - () const { return NR3D<T> (source, -dir); }

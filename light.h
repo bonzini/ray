@@ -7,6 +7,7 @@
 #include "config.h"
 #include "geom.h"
 #include "v3d.h"
+#include "texture.h"
 
 struct AbstractLight {
   bool cast_shadows;
@@ -21,10 +22,13 @@ struct Light : AbstractLight {
   Point3D pos;
   Color color;
 
-  static Color white;
+  Light (const Point3D &pos_, const Color &color_ = colors::white,
+    bool shadows = true) : AbstractLight (shadows), pos (pos_),
+    color (color_) {}
 
-  Light (const Point3D &pos_, const Color &color_ = Light::white,
-    bool shadows = true) : AbstractLight (shadows), pos (pos_), color (color_) {}
+  Light (real x_, real y_, real z_, const Color &color_ = colors::white,
+    bool shadows = true) : AbstractLight (shadows), pos (x_, y_, z_),
+    color (color_) {}
 
   Color get_color (const Point3D &p) const;
   const Point3D &get_pos () const;
@@ -40,10 +44,12 @@ struct LightWrapper : AbstractLight {
 };
 
 struct AttenuatedLight : LightWrapper {
+  real strength;
   real attenuation;
 
-  AttenuatedLight (const Light &base, real att = 0.0, bool shadows = true) :
-    LightWrapper (base, shadows), attenuation (att) {}
+  AttenuatedLight (const Light &base, real att = 0.0, real strength_ = 1.0,
+    bool shadows = true) : LightWrapper (base, shadows), strength (strength_),
+    attenuation (att) {}
 
   Color get_color (const Point3D &p) const;
 };
@@ -55,9 +61,6 @@ struct BoundedLight : LightWrapper {
     LightWrapper (base, shadows), e (e_) {}
 
   Color get_color (const Point3D &p) const;
-
- private:
-  static Color black;
 };
 
 #endif

@@ -3,20 +3,17 @@
 
 int main (void)
 {
-  Light l (Point3D (30, 30, -30));
-  Material floor;
-  Material plastic (0.0, 1.0, 1.0);
+  Light l (30, 30, -30);
+  Material floor (1, 0, 0);
+  Material plastic (1, 1, 0);
 
-  MonoTexture blue (Color (0.0, 0.0, 0.5));
-  MonoTexture red (Color (1.0, 0.0, 0.0));
+  Plane p (0, 1, 0, 0);
+  Sphere s (0, 3, 0, 3);
 
-  Plane p (0.0, 1.0, 0.0, 0.0);
-  Sphere s (0.0, 3.0, 0.0, 3.0);
-
-  Scene scene;
+  Scene scene (0.3);
   scene.add_light (l);
-  scene.add_object (p, floor, blue);
-  scene.add_object (s, floor, red);
+  scene.add_object (p, floor, MonoTexture::blue);
+  scene.add_object (s, plastic, MonoTexture::red);
 
   Image image;
   image.set_size (320, 240);

@@ -11,20 +11,32 @@ class Entity;
 class Object;
 
 struct Intersection {
-  Ray3D r;
+ private:
+  static real inf;
+
+ public:
+  NormRay3D r;
   const Entity *entity;
   const Object *object;
   real t;
 
   explicit Intersection (const Ray3D &r_) :
-    r(r_), entity (NULL), object (NULL), t (0.0) {}
+    r(r_.normalize ()), entity (NULL), object (NULL), t (inf) {}
+  explicit Intersection (const NormRay3D &r_) :
+    r(r_), entity (NULL), object (NULL), t (inf) {}
   Intersection (const Point3D &r_, const Vector3D &v_) :
-    r(r_, v_), entity (NULL), object (NULL), t (0.0) {}
+    r(r_, v_), entity (NULL), object (NULL), t (inf) {}
+  Intersection (const Point3D &r_, const UnitVector3D &v_) :
+    r(r_, v_), entity (NULL), object (NULL), t (inf) {}
   Intersection (const Ray3D &r_, real t_) :
-    r(r_.source, r_.dir, t_), entity (NULL), object (NULL), t (0.0) {}
+    r(r_.source, r_.dir, t_), entity (NULL), object (NULL), t (inf) {}
+  Intersection (const NormRay3D &r_, real t_) :
+    r(r_.source, r_.dir, t_), entity (NULL), object (NULL), t (inf) {}
   Intersection (const Intersection &i, real t_) :
     r(i.r), entity (i.entity), object (i.object), t (i.t) {}
   Intersection (const Intersection &i, Vector3D &dir, real t_ = 0.0) :
+    r(i.r (i.t), dir, t_), entity (i.entity), object (i.object), t (t_) {}
+  Intersection (const Intersection &i, UnitVector3D &dir, real t_ = 0.0) :
     r(i.r (i.t), dir, t_), entity (i.entity), object (i.object), t (t_) {}
 };
 
@@ -32,28 +44,29 @@ class Entity {
  public:
   virtual bool inside (const Point3D &p) const = 0;
   virtual bool intersect (Intersection &i, const Object &o) const = 0;
-  virtual Vector3D get_normal (const Intersection &i) const = 0;
-  virtual Vector3D get_normal (const Point3D &p) const = 0;
+  virtual UnitVector3D get_normal (const Intersection &i) const = 0;
+  virtual UnitVector3D get_normal (const Point3D &p) const = 0;
 };
 
 class Plane : public Entity {
-  Vector3D normal;
+  UnitVector3D normal;
   real d;
 
  public:
-  Plane (Point3D normal_, real d_) :
-    normal (normal_), d (d_) {}
+  Plane (Vector3D normal_, real d_) :
+    normal (normal_.normalize ()), d (d_) {}
   Plane (real a_, real b_, real c_, real d_) :
-    normal (a_, b_, c_), d (d_) {}
+    normal (Vector3D (a_, b_, c_).normalize ()), d (d_) {}
   Plane (Point3D a_, Point3D b_, Point3D c_) :
-    normal ((b_ - a_) ^ (c_ - a_)), d (-Vector3D (a_) * normal) {}
+    normal (((b_ - a_) ^ (c_ - a_)).normalize ()),
+    d (-Vector3D (a_) * normal) {}
   Plane (Point3D a_, Vector3D b_, Vector3D c_) :
-    normal (b_ ^ c_), d (-Vector3D (a_) * normal) {}
+    normal ((b_ ^ c_).normalize ()), d (-Vector3D (a_) * normal) {}
 
   bool inside (const Point3D &p) const;
   bool intersect (Intersection &i, const Object &o) const;
-  Vector3D get_normal (const Intersection &i) const;
-  Vector3D get_normal (const Point3D &p) const;
+  UnitVector3D get_normal (const Intersection &i) const;
+  UnitVector3D get_normal (const Point3D &p) const;
 };
 
 class Sphere : public Entity {
@@ -69,8 +82,8 @@ class Sphere : public Entity {
 
   bool inside (const Point3D &p) const;
   bool intersect (Intersection &i, const Object &o) const;
-  Vector3D get_normal (const Intersection &i) const;
-  Vector3D get_normal (const Point3D &p) const;
+  UnitVector3D get_normal (const Intersection &i) const;
+  UnitVector3D get_normal (const Point3D &p) const;
 };
 
 class ReverseSphere : public Sphere {
@@ -81,13 +94,13 @@ class ReverseSphere : public Sphere {
     Sphere (x_, y_, z_, r_) {}
 
   bool inside (const Point3D &p) const;
-  Vector3D get_normal (const Intersection &i) const;
-  Vector3D get_normal (const Point3D &p) const;
+  UnitVector3D get_normal (const Intersection &i) const;
+  UnitVector3D get_normal (const Point3D &p) const;
 };
 
 class CSGEntity : public Entity {
-  Vector3D get_normal (const Intersection &i) const;
-  Vector3D get_normal (const Point3D &p) const;
+  UnitVector3D get_normal (const Intersection &i) const;
+  UnitVector3D get_normal (const Point3D &p) const;
 };
 
 class BoundingBox : public CSGEntity {
@@ -110,8 +123,8 @@ class Difference : public CSGEntity {
 
   bool inside (const Point3D &p) const;
   bool intersect (Intersection &i, const Object &o) const;
-  Vector3D get_normal (const Intersection &i) const;
-  Vector3D get_normal (const Point3D &p) const;
+  UnitVector3D get_normal (const Intersection &i) const;
+  UnitVector3D get_normal (const Point3D &p) const;
 };
 
 class Union : public CSGEntity {
