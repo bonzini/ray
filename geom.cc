@@ -139,7 +139,7 @@ bool Difference::intersect (Intersection &i, const Object &o, real tlim) const
   // controllare...
   Point3D p = i1.r (i1.t);
   if (bite.inside (p))
-    return bite.intersect (i, o, tlim);
+    return bite.intersect (i, o, i1.t);
 
   i = i1;
   return true;
