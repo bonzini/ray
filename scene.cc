@@ -15,15 +15,24 @@ void Scene::render (const Ray3D &camera, Image &m, int max_ref) const
   int w = m.get_width ();
   int h = m.get_height ();
 
-  Vector3D x_vec_step = x_vec_unit * 2 / (w - 1);
-  Vector3D y_vec_step = y_vec_unit * 2 / (h - 1);
+  real vec_step;
+  Vector3D leftmost_dir;
 
-  Vector3D leftmost_dir = camera.dir - x_vec_unit - y_vec_unit;
+  if (w < h)
+    {
+      vec_step = 2.0 / (w - 1);
+      leftmost_dir = camera.dir - x_vec_unit - y_vec_unit * h / w;
+    }
+  else
+    {
+      vec_step = 2.0 / (h - 1);
+      leftmost_dir = camera.dir - x_vec_unit * w / h - y_vec_unit;
+    }
 
-  for (int i = 0; i < h; i++, leftmost_dir += y_vec_step)
+  for (int i = 0; i < h; i++, leftmost_dir += y_vec_unit * vec_step)
     {
       Vector3D dir = leftmost_dir;
-      for (int j = 0; j < w; j++, dir += x_vec_step)
+      for (int j = 0; j < w; j++, dir += x_vec_unit * vec_step)
 	m.set_pixel (j, i, trace (Ray3D (camera.source, dir), max_ref, 1.0));
       std::cerr << '.';
     }
