@@ -15,7 +15,7 @@ bool Plane::inside (const Point3D &p) const
   return Vector3D (p) * normal + d >= 0;
 }
 
-bool Plane::intersect (Intersection &i, const Object &o) const
+bool Plane::intersect (Intersection &i, const Object &o, real tlim) const
 {
   const NormRay3D &r = i.r;
   real denom = r.dir * normal;
@@ -23,7 +23,7 @@ bool Plane::intersect (Intersection &i, const Object &o) const
     return false;
 
   real t = -(Vector3D (r.source) * normal + d) / denom;
-  if (t > 0.0 && t < i.t)
+  if (t > tlim && t < i.t)
     {
       i.t = t;
       i.entity = this;
@@ -50,7 +50,7 @@ bool Sphere::inside (const Point3D &p) const
   return delta * delta <= r2;
 }
 
-bool Sphere::intersect (Intersection &i, const Object &o) const
+bool Sphere::intersect (Intersection &i, const Object &o, real tlim) const
 {
   const NormRay3D &r = i.r;
   Vector3D p_to_center = center - r.source;
@@ -61,9 +61,9 @@ bool Sphere::intersect (Intersection &i, const Object &o) const
 
   // Return the point that is in front of the observer, or the closest one.
   real tdc = sqrt (tdc2);
-  bool from_inside = tpp - tdc < 0.0;
+  bool from_inside = tpp - tdc < tlim;
   real t = from_inside ? tpp + tdc : tpp - tdc;
-  if (t > 0.0 && t < i.t)
+  if (t > tlim && t < i.t)
     {
       i.from_inside = from_inside;
       i.t = t;
@@ -117,11 +117,11 @@ bool BoundingBox::inside (const Point3D &p) const
   return bbox.inside (p) && obj.inside (p);
 }
 
-bool BoundingBox::intersect (Intersection &i, const Object &o) const
+bool BoundingBox::intersect (Intersection &i, const Object &o, real tlim) const
 {
   Intersection i1 (i.r);
-  return (bbox.intersect (i1, o) || bbox.inside (i.r.source))
-	 && obj.intersect (i, o);
+  return (bbox.intersect (i1, o, tlim) || bbox.inside (i.r.source))
+	 && obj.intersect (i, o, tlim);
 }
 
 bool Difference::inside (const Point3D &p) const
@@ -129,28 +129,20 @@ bool Difference::inside (const Point3D &p) const
   return obj.inside (p) && !bite.inside (p);
 }
 
-bool Difference::intersect (Intersection &i, const Object &o) const
+bool Difference::intersect (Intersection &i, const Object &o, real tlim) const
 {
   Intersection i1 (i);
-  bool had_intersection = obj.intersect (i1, o);
+  bool had_intersection = obj.intersect (i1, o, tlim);
   if (!had_intersection)
     return false;
 
   // controllare...
   Point3D p = i1.r (i1.t);
-  if (!bite.inside (p))
-    {
-      i = i1;
-      return true;
-    }
-  else if (bite.intersect (i, o))
-    {
-      i.from_inside = !i.from_inside;
-      return true;
-    }
-  else
-    return false;
-      
+  if (bite.inside (p))
+    return bite.intersect (i, o, tlim);
+
+  i = i1;
+  return true;
 }
 
 bool Union::inside (const Point3D &p) const
@@ -158,15 +150,15 @@ bool Union::inside (const Point3D &p) const
   return obj.inside (p) || next.inside (p);
 }
 
-bool Union::intersect (Intersection &i, const Object &o) const
+bool Union::intersect (Intersection &i, const Object &o, real tlim) const
 {
-  bool had_intersection = obj.intersect (i, o);
+  bool had_intersection = obj.intersect (i, o, tlim);
   const Union *this_union = this;
   while (this_union->next_is_union)
     {
       this_union = static_cast <const Union *> (&next);
-      had_intersection |= this_union->obj.intersect (i, o);
+      had_intersection |= this_union->obj.intersect (i, o, tlim);
     }
 
-  return had_intersection | this_union->next.intersect (i, o);
+  return had_intersection | this_union->next.intersect (i, o, tlim);
 }

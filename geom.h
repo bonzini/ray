@@ -50,7 +50,8 @@ struct Intersection {
 class Entity {
  public:
   virtual bool inside (const Point3D &p) const = 0;
-  virtual bool intersect (Intersection &i, const Object &o) const = 0;
+  virtual bool intersect (Intersection &i, const Object &o, real tlim = 0.0)
+    const = 0;
   virtual UnitVector3D get_normal (const Intersection &i) const = 0;
   virtual UnitVector3D get_normal (const Point3D &p) const = 0;
 };
@@ -71,7 +72,7 @@ class Plane : public Entity {
     normal ((b_ ^ c_).normalize ()), d (-Vector3D (a_) * normal) {}
 
   bool inside (const Point3D &p) const;
-  bool intersect (Intersection &i, const Object &o) const;
+  bool intersect (Intersection &i, const Object &o, real tlim = 0.0) const;
   UnitVector3D get_normal (const Intersection &i) const;
   UnitVector3D get_normal (const Point3D &p) const;
 };
@@ -88,7 +89,7 @@ class Sphere : public Entity {
     center (x_, y_, z_), r (r_), r2 (r_ * r_) {}
 
   bool inside (const Point3D &p) const;
-  bool intersect (Intersection &i, const Object &o) const;
+  bool intersect (Intersection &i, const Object &o, real tlim = 0.0) const;
   UnitVector3D get_normal (const Intersection &i) const;
   UnitVector3D get_normal (const Point3D &p) const;
 };
@@ -118,7 +119,7 @@ class BoundingBox : public CSGEntity {
     obj (obj_), bbox (bbox_) {};
 
   bool inside (const Point3D &p) const;
-  bool intersect (Intersection &i, const Object &o) const;
+  bool intersect (Intersection &i, const Object &o, real tlim = 0.0) const;
 };
 
 class Difference : public CSGEntity {
@@ -129,7 +130,7 @@ class Difference : public CSGEntity {
     obj (obj_), bite (bite_) {};
 
   bool inside (const Point3D &p) const;
-  bool intersect (Intersection &i, const Object &o) const;
+  bool intersect (Intersection &i, const Object &o, real tlim = 0.0) const;
 };
 
 class Union : public CSGEntity {
@@ -143,7 +144,7 @@ class Union : public CSGEntity {
     obj (obj_), next (next_), next_is_union (true) {};
 
   bool inside (const Point3D &p) const;
-  bool intersect (Intersection &i, const Object &o) const;
+  bool intersect (Intersection &i, const Object &o, real tlim = 0.0) const;
 };
 
 #endif
