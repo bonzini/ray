@@ -138,7 +138,7 @@ Color Scene::trace (const Ray3D &ray, int max_ref, real ior, Color strength,
 	  Vector3D refracted = n * ray.dir + (n * cosI - cosT) * normal;
           Ray3D refracted_ray = Ray3D (p, refracted, 0.01);
           c += trace (refracted_ray, max_ref - 1, m.ior,
-		      strength * m.refractive * obj_color,
+		      strength * m.refractive,
 		      i.from_inside ? absorbance + m.absorbance
 				    : absorbance - m.absorbance);
 	}
