@@ -67,7 +67,7 @@ class Scene {
   bool compute_intersection (Intersection &i) const;
   bool find_an_intersection (NormRay3D &r) const;
   Color trace (const Ray3D &r, int max_ref, real ior,
-	       Color strength = colors::white, real absorbance = 1.0)
+	       Color strength = colors::white, real absorbance = 0.0)
     const;
 
  public:

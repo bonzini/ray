@@ -65,6 +65,9 @@ Color Scene::trace (const Ray3D &ray, int max_ref, real ior, Color strength,
 
   Point3D p = i.r (i.t);
 
+  if (absorbance != 0.0)
+    strength *= exp (-i.t * absorbance);
+
   bool have_shadows = i.object->have_shadows;
   const Entity &e = *(i.entity);
   const Material &m = i.object->m;
@@ -72,12 +75,6 @@ Color Scene::trace (const Ray3D &ray, int max_ref, real ior, Color strength,
 
   UnitVector3D normal = i.from_inside ? -e.get_normal (i) : e.get_normal (i);
   Color obj_color = t.get_color (p) * strength;
-  if (absorbance < 1.0)
-    {
-      obj_color.r *= -exp (-i.t * absorbance);
-      obj_color.g *= -exp (-i.t * absorbance);
-      obj_color.b *= -exp (-i.t * absorbance);
-    }
 
   c += (ambient + m.ambient) * obj_color;
 
@@ -142,8 +139,8 @@ Color Scene::trace (const Ray3D &ray, int max_ref, real ior, Color strength,
           Ray3D refracted_ray = Ray3D (p, refracted, 0.01);
           c += trace (refracted_ray, max_ref - 1, m.ior,
 		      strength * m.refractive * obj_color,
-		      i.from_inside ? absorbance * m.absorbance
-				    : absorbance / m.absorbance);
+		      i.from_inside ? absorbance + m.absorbance
+				    : absorbance - m.absorbance);
 	}
     }
 
