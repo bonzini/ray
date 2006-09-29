@@ -40,7 +40,7 @@ struct MonoTexture : Texture {
 };
 
 struct UVTexture : Texture {
-  virtual Color get_color (real u, real v) const;
+  virtual Color get_color (real u, real v) const = 0;
   Color get_color (const Point3D &p3d, const Entity &e) const;
 };
 

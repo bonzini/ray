@@ -28,7 +28,7 @@ int main (int argc, char **argv)
   scene.add_object (s2, glass, MonoTexture::green);
 
   // Add a light to simulate indirect illumination
-  DirectedLight l2 (10, -1, 3, 0, -1, 1, Color (0, 0.7, 0));
+  DirectedLight l2 (10, -1, 10, 0, -1, 1, Color (0, 0.7, 0));
   scene.add_light (l2);
 
   Point3D location (0, 5, -20);
