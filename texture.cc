@@ -4,6 +4,10 @@
 #include "texture.h"
 #include "light.h"
 
+Texture::~Texture ()
+{
+}
+
 Color MonoTexture::get_color (const Point3D &p3d, const Entity &e) const
 {
   return pigment;

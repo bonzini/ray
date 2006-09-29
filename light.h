@@ -14,6 +14,7 @@ struct AbstractLight {
 
   AbstractLight (bool shadows = true) : cast_shadows (shadows) {}
 
+  virtual ~AbstractLight ();
   virtual Color get_color (const Point3D &p) const = 0;
   virtual const Point3D &get_pos () const = 0;
 };

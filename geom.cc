@@ -10,6 +10,10 @@
 
 real Intersection::inf = INFINITY;
 
+Entity::~Entity ()
+{
+}
+
 bool Plane::inside (const Point3D &p) const
 {
   return Vector3D (p) * normal + d >= 0;
@@ -92,11 +96,6 @@ UnitVector3D Sphere::get_normal (const Point3D &p) const
   return UnitVector3D ((p - center) / r);
 }
 
-UnitVector3D Sphere::get_normal (const Intersection &i) const
-{
-  return UnitVector3D ((i.r (i.t) - center) / r);
-}
-
 real Sphere::texture_u (const Point3D &p) const
 {
   real dx = p.x - center.x;
@@ -122,11 +121,6 @@ bool ReverseSphere::inside (const Point3D &p) const
 UnitVector3D ReverseSphere::get_normal (const Point3D &p) const
 {
   return UnitVector3D ((center - p) / r);
-}
-
-UnitVector3D ReverseSphere::get_normal (const Intersection &i) const
-{
-  return UnitVector3D ((center - i.r (i.t)) / r);
 }
 
 UnitVector3D CSGEntity::get_normal (const Intersection &i) const

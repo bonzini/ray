@@ -3,6 +3,10 @@
 
 #include "light.h"
 
+AbstractLight::~AbstractLight ()
+{
+}
+
 Color Light::get_color (const Point3D &p) const
 {
   return color;

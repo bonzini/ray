@@ -20,6 +20,7 @@ namespace colors {
 
 
 struct Texture {
+  virtual ~Texture ();
   virtual Color get_color (const Point3D &p3d, const Entity &e) const = 0;
 };
 
