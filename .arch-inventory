@@ -1,6 +1,0 @@
-precious ^autom4te.cache$
-precious ^config\.(guess|sub)$
-precious ^ltmain\.sh$
-precious ^missing$
-precious ^depcomp$
-precious ^install-sh$
