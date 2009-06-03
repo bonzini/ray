@@ -7,6 +7,9 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <getopt.h>
 
 void Scene::render (const Ray3D &camera, Image &m, int max_ref) const
@@ -68,16 +71,17 @@ usage(char *progname, int exit_status)
 " -h, --height=SIZE        set output height (must be power of two)\n"
 " -S, --seed=NUMBER        set random number seed\n\n";
 
-  exit (exit_status);
+  std::exit (exit_status);
 }
 
 void
 Scene::render (const Ray3D &camera_dir, int argc, char **argv,
 	       int default_width, int default_height,
-	       char *default_output_file, enum image_file_format output_format,
+	       const char *default_output_file,
+	       enum image_file_format output_format,
 	       int max_ref) const
 {
-  char *output_filename = NULL;
+  const char *output_filename = NULL;
   int width = -1;
   int height = -1;
   int seed = std::time(0);
@@ -116,14 +120,14 @@ Scene::render (const Ray3D &camera_dir, int argc, char **argv,
           break;
 
         case 'f':
-          if (strcmp (optarg, "ppm") == 0)
+          if (std::strcmp (optarg, "ppm") == 0)
 	    {
 	      output_format = OUT_PPM;
   	      if (default_output_file == NULL)
 		default_output_file = "ptgen.ppm";
 	    }
 #ifdef HAVE_LIBPNG
-	  else if (strcmp (optarg, "png") == 0)
+	  else if (std::strcmp (optarg, "png") == 0)
 	    {
 	      output_format = OUT_PNG;
   	      if (default_output_file == NULL)

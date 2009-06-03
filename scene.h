@@ -100,14 +100,14 @@ class Scene {
 #ifdef HAVE_LIBPNG
   void render (const Ray3D &camera, int argc, char **argv,
 	       int default_width = 640, int default_height = 480,
-	       char *default_output_file = NULL,
+	       const char *default_output_file = NULL,
 	       enum image_file_format output_format = OUT_PNG, int max_ref = 5)
     const;
 
   void render (const Point3D &camera, const Vector3D &dir,
 	       int argc, char **argv,
 	       int default_width = 640, int default_height = 480,
-	       char *default_output_file = NULL,
+	       const char *default_output_file = NULL,
 	       enum image_file_format output_format = OUT_PNG, int max_ref = 5)
     const {
     Ray3D camera_dir (camera, dir);
@@ -117,14 +117,14 @@ class Scene {
 #else
   void render (const Ray3D &camera, int argc, char **argv,
 	       int default_width = 640, int default_height = 480,
-	       char *default_output_file = NULL,
+	       const char *default_output_file = NULL,
 	       enum image_file_format output_format = OUT_PPM, int max_ref = 5)
     const;
 
   void render (const Point3D &camera, const Vector3D &dir,
 	       int argc, char **argv,
 	       int default_width = 640, int default_height = 480,
-	       char *default_output_file = NULL,
+	       const char *default_output_file = NULL,
 	       enum image_file_format output_format = OUT_PPM, int max_ref = 5)
     const {
     Ray3D camera_dir (camera, dir);

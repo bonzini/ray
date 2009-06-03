@@ -27,7 +27,7 @@ class Image
       };
 
     bool write(std::ostream &os, enum image_file_format fmt) const;
-    bool write(char *file_name, enum image_file_format fmt) const {
+    bool write(const char *file_name, enum image_file_format fmt) const {
       std::ofstream os (file_name, std::ofstream::binary);
       return write (os, fmt);
     }
